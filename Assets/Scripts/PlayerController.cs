@@ -3,16 +3,19 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
 {
-    // player movement as a whole is handled in this script, while the swinging will takeover from another 
-    private float moveSpeed = 8f;
+    // player movement as a whole is handled in this script,
+    // while the swinging will takeover from another script
+    [SerializeField] private float moveSpeed = 8f;
 
-    // jumping variables 
-    private float jumpForce = 12f;
+    // jumping variables
+    [SerializeField] private float jumpForce = 12f;
 
     // ground check for jumping
-    private Transform groundCheck;
-    private float groundCheckRadius = 0.2f;
-    private LayerMask groundLayer;
+    [SerializeField] private Transform groundCheck;
+
+    [SerializeField] private float groundCheckRadius = 0.2f;
+
+    [SerializeField] private LayerMask groundLayer;
 
     private Rigidbody2D rb;
 
@@ -25,8 +28,20 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+
+        // automatically looks for a child object called GroundCheck
+        // if one exists in the hierarchy
+        if (groundCheck == null)
+        {
+            Transform foundGroundCheck = transform.Find("GroundCheck");
+
+            if (foundGroundCheck != null)
+            {
+                groundCheck = foundGroundCheck;
+            }
+        }
     }
-    
+
     private void Update()
     {
         GroundCheck();
@@ -41,6 +56,7 @@ public class PlayerController : MonoBehaviour
             Jump();
         }
     }
+
     // fixed update is used for physics calculations
     private void FixedUpdate()
     {
@@ -52,6 +68,7 @@ public class PlayerController : MonoBehaviour
             rb.velocity.y
         );
     }
+
     // jump function that sets the y velocity to the jump force
     private void Jump()
     {
@@ -63,13 +80,19 @@ public class PlayerController : MonoBehaviour
 
     private void GroundCheck()
     {
+        // prevents null reference errors if GroundCheck
+        // has not been assigned yet
+        if (groundCheck == null)
+            return;
+
         isGrounded = Physics2D.OverlapCircle(
             groundCheck.position,
             groundCheckRadius,
             groundLayer
         );
     }
-    // grouncd check gizmo for debug purposes
+
+    // ground check gizmo for debug purposes
     private void OnDrawGizmosSelected()
     {
         if (groundCheck == null)
